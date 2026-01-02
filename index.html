@@ -237,7 +237,7 @@
   let userFollowed = localStorage.getItem(LOCAL_KEY) === "true";
 
   function updateButton(count) {
-    btn.innerText = userFollowed ? `Following {${count}}` : `Follow {${count}}`;
+    btn.innerText = userFollowed ? `Following ${count}` : `Follow ${count}`;
   }
 
   // 🔹 Button click to toggle follow/unfollow
