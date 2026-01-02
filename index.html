@@ -213,7 +213,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-  import { getFirestore, doc, getDoc, setDoc, onSnapshot } 
+  import { getFirestore, doc, getDoc, setDoc } 
     from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -237,25 +237,14 @@
   let userFollowed = localStorage.getItem(LOCAL_KEY) === "true";
 
   function updateButton(count) {
-    btn.innerText = userFollowed ? `Following ${count}` : `Follow ${count}`;
+    btn.innerText = userFollowed ? `Following {${count}}` : `Follow {${count}}`;
   }
 
-  // Real-time listener
-  onSnapshot(counterRef, (docSnap) => {
-    if (docSnap.exists()) {
-      updateButton(docSnap.data().count);
-    } else {
-      // Create document if missing
-      setDoc(counterRef, { count: 0 });
-    }
-  });
-
-  // Click handler
+  // 🔹 Button click to toggle follow/unfollow
   btn.addEventListener("click", async () => {
-    const snap = await getDoc(counterRef); // ✅ correct function
+    const snap = await getDoc(counterRef);
     let count = snap.exists() ? snap.data().count : 0;
 
-    // Toggle follow/unfollow
     if (!userFollowed) {
       count++;
       userFollowed = true;
@@ -266,10 +255,21 @@
       localStorage.setItem(LOCAL_KEY, "false");
     }
 
-    // Update Firestore safely
     await setDoc(counterRef, { count }, { merge: true });
     updateButton(count);
   });
+
+  // 🔹 Auto-update every 1 second
+  setInterval(async () => {
+    try {
+      const snap = await getDoc(counterRef);
+      if (snap.exists()) {
+        updateButton(snap.data().count);
+      }
+    } catch (err) {
+      console.error("Error updating count:", err);
+    }
+  }, 1000);
 </script>
 
 
